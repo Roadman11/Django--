@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'web_01.apps.Web01Config',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -137,7 +138,7 @@ CACHES = {
         "BACKEND": "django_redis.cache.RedisCache",
         # 缓存空间的地址，此处是对应redis数据库的地址
         # 注意：这里 192.168.19.131 需要改成自己的 redis 数据库的IP
-        "LOCATION": "redis://192.168.19.131:6379/1",
+        "LOCATION": "redis://192.168.19.128:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
