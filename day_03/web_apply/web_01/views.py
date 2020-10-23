@@ -3,29 +3,56 @@ from django.http import HttpResponse
 from web_01.models import User
 from django.http import JsonResponse
 from django.views import View
+from django.utils.decorators import method_decorator
+
+# 重复代码的优化
+# 判断用户是否登录
+def is_login(request):
+    username=request.session.get('username')
+    if username:
+        return HttpResponse('%s用户已登录' % username)
+
+
+# 装饰器方法
+def logging(view_func):
+
+    def inner(request):
+        username=request.session.get('username')
+        if username:
+            return HttpResponse('%s用户已登录' % username)
+        return view_func(request)
+    return inner
+
+
+# mixin扩展类
+class LoginviewMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view_func = super(LoginviewMixin, cls).as_view(**initkwargs)
+
+        return logging(view_func)
 
 
 # 登录页面视图
 
-class LoginView(View):
+class LoginView(LoginviewMixin,View):
     #GET
-
+    # @method_decorator(logging)
     def get(self,request):
         # 判断用户是否登录
-        username = request.session.get('username')
-        if username:
-            return HttpResponse('%s用户已登录' % username)
+        # response = is_login(request)
+        # if response:
+        #     return response
+        # # 若用户未登录，返回登录页面
+        return render(request, 'login.html')
 
-        # 若用户未登录，返回登录页面
-        return render(request,'login.html')
-
+    # @method_decorator(logging)
     def post(self,request):
         # 注册页面
         # 先判断用户是否已经登录
-        username = request.session.get('username')
-        if username:
-            return HttpResponse('%s用户已登录' % username)
-
+        # response = is_login(request)
+        # if response:
+        #     return response
         # 获取页面post返回的数据
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -33,7 +60,8 @@ class LoginView(View):
 
         # 查询数据库，判断用户名和密码是否正确
         try:
-            # 根据 username 和 password 查询对应的用户是否存在，即进行用户名和密码校验
+            # 根据 username 和 passw
+            # ord 查询对应的用户是否存在，即进行用户名和密码校验
             # get 方法默认会利用查询到的数据创建一个对应的模型类对象，并将这个模型对象返回
             user=User.objects.get(username=username, password=password)
         except User.DoesNotExist:
